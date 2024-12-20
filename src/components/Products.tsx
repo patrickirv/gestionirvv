@@ -4,16 +4,44 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import { AddProductDialog } from './AddProductDialog';
+import { EditProductDialog } from './EditProductDialog';
+import { useToast } from '@/components/ui/use-toast';
 
 export const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const { toast } = useToast();
 
   // Mock data - replace with actual data later
-  const products = [
+  const [products, setProducts] = useState([
     { id: 1, name: 'Laptop', category: 'Electronics', price: 999.99, stock: 10 },
     { id: 2, name: 'Mouse', category: 'Accessories', price: 29.99, stock: 25 },
-  ];
+  ]);
+
+  const handleEdit = (product: any) => {
+    setSelectedProduct(product);
+    setShowEditDialog(true);
+  };
+
+  const handleDelete = (productId: number) => {
+    // Here you would typically make an API call to delete the product
+    setProducts(products.filter(p => p.id !== productId));
+    toast({
+      title: "Product deleted",
+      description: "The product has been successfully deleted.",
+    });
+  };
+
+  const handleUpdateProduct = (updatedProduct: any) => {
+    setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    setShowEditDialog(false);
+    toast({
+      title: "Product updated",
+      description: "The product has been successfully updated.",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -58,10 +86,18 @@ export const Products = () => {
                   <td className="py-3 px-4">{product.stock}</td>
                   <td className="py-3 px-4">
                     <div className="flex justify-end space-x-2">
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleEdit(product)}
+                      >
                         <Edit2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleDelete(product.id)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -74,6 +110,14 @@ export const Products = () => {
       </Card>
 
       <AddProductDialog open={showAddDialog} onClose={() => setShowAddDialog(false)} />
+      {selectedProduct && (
+        <EditProductDialog 
+          open={showEditDialog} 
+          onClose={() => setShowEditDialog(false)}
+          product={selectedProduct}
+          onUpdate={handleUpdateProduct}
+        />
+      )}
     </div>
   );
 };

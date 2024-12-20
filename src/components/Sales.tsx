@@ -3,16 +3,23 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, ShoppingCart, Plus, Minus, X } from 'lucide-react';
+import { CheckoutDialog } from './CheckoutDialog';
 
 export const Sales = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<any[]>([]);
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
 
   // Mock products - replace with actual data later
-  const products = [
+  const [products, setProducts] = useState([
     { id: 1, name: 'Laptop', category: 'Electronics', price: 999.99, stock: 10 },
     { id: 2, name: 'Mouse', category: 'Accessories', price: 29.99, stock: 25 },
-  ];
+  ]);
+
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const addToCart = (product: any) => {
     const existingItem = cart.find((item) => item.id === product.id);
@@ -63,7 +70,7 @@ export const Sales = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <Card key={product.id} className="p-4">
                   <div className="flex justify-between items-start">
                     <div>
@@ -136,13 +143,24 @@ export const Sales = () => {
                     <span className="font-semibold">Total:</span>
                     <span className="font-bold">${total.toFixed(2)}</span>
                   </div>
-                  <Button className="w-full">Proceed to Checkout</Button>
+                  <Button 
+                    className="w-full"
+                    onClick={() => setShowCheckoutDialog(true)}
+                  >
+                    Proceed to Checkout
+                  </Button>
                 </div>
               )}
             </div>
           </Card>
         </div>
       </div>
+
+      <CheckoutDialog 
+        open={showCheckoutDialog} 
+        onClose={() => setShowCheckoutDialog(false)}
+        total={total}
+      />
     </div>
   );
 };

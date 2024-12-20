@@ -1,62 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Minus } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 
-interface AddProductDialogProps {
+interface EditProductDialogProps {
   open: boolean;
   onClose: () => void;
+  product: any;
+  onUpdate: (product: any) => void;
 }
 
-export const AddProductDialog = ({ open, onClose }: AddProductDialogProps) => {
+export const EditProductDialog = ({ open, onClose, product, onUpdate }: EditProductDialogProps) => {
   const [formData, setFormData] = useState({
+    id: '',
     name: '',
     category: '',
     price: '',
     stock: '',
   });
 
-  const [categories, setCategories] = useState(['Electronics', 'Accessories', 'Peripherals']);
-  const [newCategory, setNewCategory] = useState('');
-  const { toast } = useToast();
-
-  const handleAddCategory = () => {
-    if (newCategory && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory]);
-      setNewCategory('');
-      toast({
-        title: "Category added",
-        description: "New category has been added successfully.",
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: product.price.toString(),
+        stock: product.stock.toString(),
       });
     }
-  };
+  }, [product]);
 
-  const handleRemoveCategory = (categoryToRemove: string) => {
-    setCategories(categories.filter(cat => cat !== categoryToRemove));
-    if (formData.category === categoryToRemove) {
-      setFormData({ ...formData, category: '' });
-    }
-    toast({
-      title: "Category removed",
-      description: "The category has been removed successfully.",
-    });
-  };
+  // Mock categories - replace with actual data later
+  const categories = ['Electronics', 'Accessories', 'Peripherals'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    onClose();
+    onUpdate({
+      ...formData,
+      id: product.id,
+      price: parseFloat(formData.price),
+      stock: parseInt(formData.stock),
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Product</DialogTitle>
+          <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -71,21 +65,6 @@ export const AddProductDialog = ({ open, onClose }: AddProductDialogProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
-            <div className="flex space-x-2 mb-2">
-              <Input
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="New category name"
-              />
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon"
-                onClick={handleAddCategory}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
             <Select
               value={formData.category}
               onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -95,24 +74,9 @@ export const AddProductDialog = ({ open, onClose }: AddProductDialogProps) => {
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
-                  <div key={category} className="flex items-center justify-between px-2">
-                    <SelectItem value={category}>
-                      {category}
-                    </SelectItem>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleRemoveCategory(category);
-                      }}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -147,7 +111,7 @@ export const AddProductDialog = ({ open, onClose }: AddProductDialogProps) => {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Add Product</Button>
+            <Button type="submit">Update Product</Button>
           </div>
         </form>
       </DialogContent>
