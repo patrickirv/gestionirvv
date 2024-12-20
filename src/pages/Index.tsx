@@ -1,13 +1,20 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Layout } from '@/components/Layout';
+import { Dashboard } from '@/components/Dashboard';
+import { Products } from '@/components/Products';
+import { Sales } from '@/components/Sales';
+import { Reports } from '@/components/Reports';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+      {activeTab === 'dashboard' && <Dashboard />}
+      {activeTab === 'products' && <Products />}
+      {activeTab === 'sales' && <Sales />}
+      {activeTab === 'reports' && <Reports />}
+    </Layout>
   );
 };
 
